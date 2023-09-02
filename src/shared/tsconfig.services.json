@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "module": "es2022",
+    "target": "es2017",
+    "sourceMap": true,
+    "baseUrl": ".",
+    "outDir": "wwwroot/output",
+    "rootDir": "."
+  },
+  "include": [
+    "**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "resources",
+    "**/*.razor.ts"
+  ]
+}

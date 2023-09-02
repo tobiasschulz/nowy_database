@@ -1,0 +1,26 @@
+<Project>
+
+  <PropertyGroup>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="..\shared\Shared.props"/>
+    <Content Remove="..\shared\Shared.targets"/>
+    <None Include="..\shared\Shared.props">
+      <Link>Properties\shared\Shared.props</Link>
+      <Pack>false</Pack>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Include="..\shared\Shared.targets">
+      <Link>Properties\shared\Shared.targets</Link>
+      <Pack>false</Pack>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="wwwroot\.gitignore"/>
+    <None Include="wwwroot\.gitignore"/>
+  </ItemGroup>
+
+</Project>

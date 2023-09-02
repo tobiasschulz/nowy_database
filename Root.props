@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Project>
+	<PropertyGroup>
+		<IsRootPropsImported>True</IsRootPropsImported>
+		<BuildingOnMac Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' == 'true'">true</BuildingOnMac>
+		<BuildingOnLinux Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">true</BuildingOnLinux>
+		<RepositoryPath>$(MSBuildThisFileDirectory)</RepositoryPath>
+		<BuildPath>$(MSBuildThisFileDirectory)build</BuildPath>
+		<ProjectName>$(MSBuildProjectFile.Replace(".MACOS.csproj","").Replace(".WINDOWS.csproj","").Replace(".LINUX.csproj","").Replace(".NET6.csproj","").Replace(".csproj",""))</ProjectName>
+	</PropertyGroup>
+	<PropertyGroup>
+		<UnixTimestampSeconds>$([System.DateTime]::UtcNow.Subtract($([System.DateTime]::Parse("1970-01-01T00:00:00.0000000Z").ToUniversalTime())).TotalSeconds.ToString("F0"))</UnixTimestampSeconds>
+	</PropertyGroup>
+	<PropertyGroup>
+		<LangVersion>latest</LangVersion>
+		<NeutralLanguage>en</NeutralLanguage>
+		<Company>nowykom</Company>
+		<Authors>nowykom</Authors>
+		<Copyright>2023 nowykom UG</Copyright>
+        <VersionTimestampFileName>$(MSBuildThisFileDirectory)\VersionTimestamp.txt.user</VersionTimestampFileName>
+        <VersionTimestamp Condition="!Exists($(VersionTimestampFileName))">0</VersionTimestamp>
+        <VersionTimestamp Condition=" Exists($(VersionTimestampFileName))">$([System.IO.File]::ReadAllText($(VersionTimestampFileName)))</VersionTimestamp>
+		<PackageVersion__1>1.0.1.$(UnixTimestampSeconds)</PackageVersion__1>
+        <PackageVersion__2>1.0.1.$([System.DateTime]::Now.ToString("yyMMddHHmm").Substring(0,9))</PackageVersion__2>
+        <PackageVersion__3>1.0.1.$([System.DateTime]::UtcNow.ToString("yyMMdd").Substring(0,6))$([MSBuild]::Add($([MSBuild]::Divide($([System.DateTime]::UtcNow.TimeOfDay.TotalSeconds), 87)), 1000).ToString().Substring(1,3))</PackageVersion__3>
+        <PackageVersion>1.0.2.$(VersionTimestamp)</PackageVersion>
+		<PackageLicenseUrl>http://choosealicense.com/no-license/</PackageLicenseUrl>
+		<PackageIconUrl>https://www.leuchtraketen.com/dots.png</PackageIconUrl>
+		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+		<PackageTags>nowykom</PackageTags>
+		<RepositoryType>git</RepositoryType>
+		<IncludeSymbols>True</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<IncludeSource>True</IncludeSource>
+		<PackageOutputPath>$(BuildPath)\artifacts-incoming</PackageOutputPath>
+		<IsTestProject>$(MSBuildProjectName.Contains('Test'))</IsTestProject>
+		<GenerateDocumentationFile Condition=" '$(OS)' == 'Windows_NT' ">$(IsTestProject)</GenerateDocumentationFile>
+		<GeneratePackageOnBuild Condition=" '$(OS)' == 'Windows_NT' ">$(IsTestProject)</GeneratePackageOnBuild>
+		<RestoreProjectStyle>PackageReference</RestoreProjectStyle>
+	</PropertyGroup>
+    <ItemGroup>
+        <VersionPropsLines Include='$([System.DateTime]::UtcNow.ToString("yyMMdd").Substring(0,6))$([MSBuild]::Add($([MSBuild]::Divide($([System.DateTime]::UtcNow.TimeOfDay.TotalSeconds), 87)), 1000).ToString().Substring(1,3))'/>
+    </ItemGroup>
+    <Target Name="WriteVersionFile">
+        <WriteLinesToFile
+            File="$(VersionTimestampFileName)"
+            Lines="@(VersionPropsLines)"
+            Overwrite="true"
+            Encoding="ASCII"/>
+    </Target>
+    <PropertyGroup>
+        <PrepareForBuildDependsOn Condition="!Exists($(VersionTimestampFileName))">
+            WriteVersionFile;
+            $(PrepareForBuildDependsOn)
+        </PrepareForBuildDependsOn>
+    </PropertyGroup>
+
+
+	<Target Name="OutputProjectName">
+		<Error Text="$(ProjectName)" />
+	</Target>
+	<Target Name="OutputAppNameShort">
+		<Error Text="$(AppNameShort)" />
+	</Target>
+	<Target Name="OutputSystemEnvironmentVersion">
+		<Error Text="$(MicrosoftNETBuildTasksDirectory)" />
+	</Target>
+	<Target Name="VerifyAppNameShortExists" BeforeTargets="BeforeBuild">
+		<!--
+		<Error Text="Property 'AppNameShort' is not defined." Condition=" '$(AppNameShort)' == '' " />
+		-->
+	</Target>
+	<PropertyGroup Condition=" $(TargetFramework.ToLower().Contains('android')) ">
+		<DefineConstants>$(DefineConstants);MONOANDROID;ANDROID</DefineConstants>
+		<AssetTargetFallback>$(AssetTargetFallback);net6.0-android;net6.0-android30.0</AssetTargetFallback>
+	</PropertyGroup>
+	<PropertyGroup Condition=" $(TargetFramework.ToLower().Contains('ios')) ">
+		<DefineConstants>$(DefineConstants);XAMARIN_IOS;IOS</DefineConstants>
+		<AssetTargetFallback>$(AssetTargetFallback);net6.0-android;net6.0-ios13.6</AssetTargetFallback>
+	</PropertyGroup>
+	<PropertyGroup>
+		<Nullable>disable</Nullable>
+	</PropertyGroup>
+	<PropertyGroup Condition=" $(TargetFramework.StartsWith('net5')) Or $(TargetFramework.StartsWith('net6')) Or $(TargetFramework.StartsWith('monoandroid')) Or $(TargetFramework.StartsWith('xamarin.ios')) ">
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+	<Target Name="PrintTargetFramework" BeforeTargets="BeforeBuild">
+		<Message Text="TargetFramework: $(TargetFramework)" />
+	</Target>
+	<PropertyGroup>
+		<GitBranch>
+		</GitBranch>
+		<F>$(RepositoryPath)\.git\HEAD</F>
+		<GitBranch Condition="Exists($(F))">$([System.IO.File]::ReadAllText($(F)))</GitBranch>
+		<GitBranch>$(GitBranch.Replace("ref: ","").Replace("refs/heads/","").Replace("/", "_").Replace("origin_", "").Trim())</GitBranch>
+		<DefineConstants Condition=" $(GitBranch.StartsWith('prod')) ">$(DefineConstants);PROD</DefineConstants>
+		<DefineConstants Condition=" $(GitBranch.StartsWith('esr')) ">$(DefineConstants);ESR</DefineConstants>
+		<DefineConstants Condition=" '$(GitBranch)' == 'master' ">$(DefineConstants);MASTER</DefineConstants>
+	</PropertyGroup>
+</Project>

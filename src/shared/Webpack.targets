@@ -1,0 +1,105 @@
+<Project>
+
+  <Target Name="NodeInstall" Inputs="package.json" Outputs="$(NodeModulesStampFile)">
+    <!--
+        Use npm install or npm ci depending on RestorePackagesWithLockFile value.
+        Uncomment the following lines if you want to use this feature:
+
+        <PropertyGroup>
+          <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+        </PropertyGroup>
+     -->
+    <Exec Command="npm ci" Condition="'$(RestorePackagesWithLockFile)' == 'true'" />
+    <Exec Command="npm install" Condition="'$(RestorePackagesWithLockFile)' != 'true'" />
+
+    <!-- Write the stamp file, so incremental builds work -->
+    <Touch Files="$(NodeModulesStampFile)" AlwaysCreate="true" />
+  </Target>
+
+  <Target Name="NodeFindConfigs" DependsOnTargets="NodeInstall">
+    <ItemGroup>
+      <!-- Components -->
+      <_NodeCopyConfigsInputs Include="..\shared\tsconfig.razor.json" />
+      <!-- Services -->
+      <_NodeCopyConfigsInputs Include="..\shared\tsconfig.services.json" />
+      <!-- Resources -->
+      <_NodeCopyConfigsInputs Include="..\shared\tsconfig.webpack.json" />
+      <_NodeCopyConfigsInputs Include="..\shared\webpack.config.js" />
+    </ItemGroup>
+    <Message Text="_NodeCompileInputsComponents: @(_NodeCompileInputsComponents)" />
+  </Target>
+
+  <Target Name="NodeCopyConfigs" DependsOnTargets="NodeFindConfigs" Inputs="@(_NodeCopyConfigsInputs)" Outputs="$(NodeCompileConfigsStampFile)">
+    <Copy SourceFiles="@(_NodeCopyConfigsInputs)" DestinationFolder="." SkipUnchangedFiles="true" />
+
+    <!-- Write the stamp file, so incremental builds work -->
+    <MakeDir Directories="$(NodeCompileStampDirectory)" />
+    <Touch Files="$(NodeCompileConfigsStampFile)" AlwaysCreate="true" />
+  </Target>
+
+  <Target Name="NodeCompileFindFilesComponents" DependsOnTargets="NodeInstall">
+    <ItemGroup>
+      <_NodeCompileInputsComponents Include="Components\**\*.ts" />
+      <_NodeCompileInputsComponents Include="Components\**\*.js" />
+      <_NodeCompileInputsComponents Include="Components\**\*.scss" />
+      <_NodeCompileInputsComponents_XXX Include="tsconfig.razor.json" />
+    </ItemGroup>
+    <Message Text="_NodeCompileInputsComponents: @(_NodeCompileInputsComponents)" />
+  </Target>
+
+  <Target Name="NodeCompileFindFilesServices" DependsOnTargets="NodeInstall">
+    <ItemGroup>
+      <_NodeCompileInputsServices Include="Services\**\*.ts" />
+      <_NodeCompileInputsServices Include="Services\**\*.js" />
+      <_NodeCompileInputsServices Include="Services\**\*.scss" />
+      <_NodeCompileInputsServices_XXX Include="tsconfig.services.json" />
+    </ItemGroup>
+    <Message Text="_NodeCompileInputsServices: @(_NodeCompileInputsServices)" />
+  </Target>
+
+  <Target Name="NodeCompileFindFilesResources" DependsOnTargets="NodeInstall">
+    <ItemGroup>
+      <_NodeCompileInputsResources Include="resources\**\*.ts" />
+      <_NodeCompileInputsResources Include="resources\**\*.js" />
+      <_NodeCompileInputsResources Include="resources\**\*.scss" />
+      <_NodeCompileInputsResources_XXX Include="tsconfig.webpack.json" />
+      <_NodeCompileInputsResources_XXX Include="webpack.config.js" />
+      <_NodeCompileInputsResources_XXX Include="webpack.config.hook.js" />
+    </ItemGroup>
+    <Message Text="_NodeCompileInputsResources: @(_NodeCompileInputsResources)" />
+  </Target>
+
+  <Target Name="NodeCompileComponents" DependsOnTargets="NodeCompileFindFilesComponents;NodeCopyConfigs" Inputs="@(_NodeCompileInputsComponents)" Outputs="$(NodeCompileComponentsStampFile)">
+    <Exec Command="npx tsc -p tsconfig.razor.json" />
+
+    <MakeDir Directories="$(NodeCompileStampDirectory)" />
+    <Touch Files="$(NodeCompileComponentsStampFile)" AlwaysCreate="True" />
+    <ItemGroup>
+      <FileWrites Include="$(NodeCompileComponentsStampFile)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="NodeCompileServices" DependsOnTargets="NodeCompileFindFilesServices;NodeCopyConfigs" Inputs="@(_NodeCompileInputsServices)" Outputs="$(NodeCompileServicesStampFile)">
+    <Exec Command="npx tsc -p tsconfig.services.json" />
+
+    <MakeDir Directories="$(NodeCompileStampDirectory)" />
+    <Touch Files="$(NodeCompileServicesStampFile)" AlwaysCreate="True" />
+    <ItemGroup>
+      <FileWrites Include="$(NodeCompileServicesStampFile)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="NodeCompileResources" DependsOnTargets="NodeCompileFindFilesResources;NodeCopyConfigs" Inputs="@(_NodeCompileInputsResources)" Outputs="$(NodeCompileResourcesStampFile)">
+    <Exec Command="npx webpack --config webpack.config.js" />
+
+    <MakeDir Directories="$(NodeCompileStampDirectory)" />
+    <Touch Files="$(NodeCompileResourcesStampFile)" AlwaysCreate="True" />
+    <ItemGroup>
+      <FileWrites Include="$(NodeCompileResourcesStampFile)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="NodeCompile" DependsOnTargets="NodeCompileComponents;NodeCompileServices;NodeCompileResources">
+  </Target>
+
+</Project>

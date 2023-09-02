@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <Import Project="..\shared\Shared.props" />
+  <Import Project="..\shared\Shared.targets" />
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Nowy.Database.Common\Nowy.Database.Common.csproj" />
+    <ProjectReference Include="..\Nowy.Database.Contract\Nowy.Database.Contract.csproj" />
+  </ItemGroup>
+
+</Project>

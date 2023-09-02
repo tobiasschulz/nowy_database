@@ -1,0 +1,43 @@
+name: Build Docker
+
+env:
+  BRANCH: ${{ github.ref_name }}
+
+on:
+  push:
+    branches: [ "master", "tobias" ]
+    paths:
+      - 'src/Nowy.Database*/**'
+      - 'src/Nowy.Auth*/**'
+      - 'build-docker.sh'
+      - 'nukebuild/**'
+      - '.github/workflows/build-docker.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, linux]
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          path: nowy_database
+
+      - name: Docker build
+        run: cd nowy_database; sudo bash build-docker.sh
+        env:
+          NuGetAzureDevOpsPassword: ${{ secrets.NUGET_AZUREDEVOPS_PASSWORD }}
+          NuGetOrgApiKey: ${{ secrets.NUGET_ORG_APIKEY }}
+
+      - name: Cleanup
+        if: always()
+        run: rm -rf nowy_database
+
+#      - name: Docker Prune
+#        if: always()
+#        run: sudo docker system prune -af
+
+

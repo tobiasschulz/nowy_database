@@ -1,0 +1,57 @@
+name: NuGet packages
+
+env:
+  DOTNET_VERSION: '7.0.306'                 # set this to the .NET Core version to use
+  BRANCH: ${{ github.ref_name }}
+
+on:
+  push:
+    branches: [ "master" ]
+    paths:
+      - 'src/Nowy.Database*/**'
+      - 'src/Nowy.Auth*/**'
+      - 'nukebuild/**'
+      - '.github/workflows/deploy-nuget.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, linux]
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          path: nowy_database
+
+      - name: Cleanup
+        run: rm -rf ~/.dotnet/toolResolverCache
+
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: 'just-a-placeholder-so-we-dont-get-errors'
+          if_key_exists: ignore
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Android SDK
+        run: bash -c 'yes | androidsdk "platform-tools" "platforms;android-33" "ndk-bundle" "build-tools;33.0.0"'
+
+      - name: Run './build.cmd CiGithubActionsLinux'
+        run: cd nowy_database; export PATH="$PATH:$HOME/.dotnet/tools"; ./build.cmd CiGithubActionsLinux
+        env:
+          NuGetAzureDevOpsPassword: ${{ secrets.NUGET_AZUREDEVOPS_PASSWORD }}
+          NuGetOrgApiKey: ${{ secrets.NUGET_ORG_APIKEY }}
+
+      - name: Cleanup
+        if: always()
+        run: rm -rf nowy_database
+
+

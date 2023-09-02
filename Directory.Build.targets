@@ -1,0 +1,5 @@
+<Project>
+
+  <Import Project="Root.targets" Condition=" '$(IsRootTargetsImported)' == '' "/>
+
+</Project>

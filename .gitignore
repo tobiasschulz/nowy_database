@@ -1,0 +1,119 @@
+# Executables
+*.exe
+*.dll
+*.pdb
+*.mdb
+*.bin
+
+# Packages
+*.nupkg
+
+# Build directories
+bin
+obj
+Debug
+Release
+packages
+global-packages
+artifacts
+packages
+backup
+pub
+publish
+
+# IDE-specific directories
+.idea
+*.userprefs
+.suo
+.vs
+.droidres
+
+# Nuget
+*.lock.json
+*.nuget.props
+*.nuget.targets
+
+# backup files
+*.save
+*.bak
+*.backup
+*.suo
+*.user
+*.swp
+~*
+
+# Temporary directories
+tmp
+temp
+x
+xx
+xxx
+y
+yy
+yyy
+z
+zz
+zzz
+*.so.0
+
+# UWP
+AppPackages
+BundleArtifacts
+
+# macos
+.DS_Store
+
+# version incrementer
+AndroidManifest.temp.xml
+Info.plist
+BuildVersion.gen.cs
+app.props
+
+# xaml
+*.xaml.gen.cs
+*.dkxaml.gen.cs
+
+# Android Resource.Designer.cs
+**/[Rr]esource.[Dd]esigner.cs
+
+# Android C++
+objs-debug
+*.a
+
+# Mono Crash
+mono_crash.*.json
+
+# pkg-config: ignore certain unneeded files (but we want other .pc files)
+libnghttp2_asio.pc
+
+# Mono Profiler
+*.mlpd
+
+# Web, Laravel
+node_modules
+public/hot
+public/storage
+storage/*.key
+/vendor
+.env
+.env.backup
+.phpunit.result.cache
+docker-compose.override.yml
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+.idea
+.vscode
+composer.phar
+
+# Other
+profile.txt
+files-android
+database.sqlite
+*.nettrace
+*.speedscope.json
+mail.info.1
+**/MSBuild.gen.cs
+**/MSBuild.gen.sh
+
